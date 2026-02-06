@@ -1,47 +1,42 @@
-import React from "react";
+import { useState, useEffect, useRef } from "react";
+import MovieList from "../components/MovieList";
 
 const Home = () => {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const inputRef = useRef();
+
+  const fetchMovies = async (query) => {
+    setLoading(true);
+    const res = await fetch(
+      `http://www.omdbapi.com/?apikey=${import.meta.env.VITE_MOVIE_KEY}&s=${query}`,
+    );
+    const data = await res.json();
+    setMovies(data.Search || []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchMovies("Avengers");
+  }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const query = inputRef.current.value.trim();
+    if (query) fetchMovies(query);
+  };
+
   return (
     <div className="home">
-      <form>
-        <input className="searchInput" placeholder="Search for a movie..." />
+      <form onSubmit={handleSearch}>
+        <input
+          ref={inputRef}
+          className="searchInput"
+          placeholder="Search for a movie..."
+        />
         <button type="submit">Search 🔎</button>
       </form>
-      <div className="movie-list">
-        <div className="movie-card">
-          <img
-            alt="The Avengers"
-            src="https://m.media-amazon.com/images/M/MV5BNGE0YTVjNzUtNzJjOS00NGNlLTgxMzctZTY4YTE1Y2Y1ZTU4XkEyXkFqcGc@._V1_SX300.jpg"
-          />
-          <h3>The Avengers</h3>
-          <p>2012</p>
-          <a href="movie-detail.html" data-discover="true">
-            Details
-          </a>
-        </div>
-        <div className="movie-card">
-          <img
-            alt="The Avengers"
-            src="https://m.media-amazon.com/images/M/MV5BNGE0YTVjNzUtNzJjOS00NGNlLTgxMzctZTY4YTE1Y2Y1ZTU4XkEyXkFqcGc@._V1_SX300.jpg"
-          />
-          <h3>The Avengers</h3>
-          <p>2012</p>
-          <a href="movie-detail.html" data-discover="true">
-            Details
-          </a>
-        </div>
-        <div className="movie-card">
-          <img
-            alt="The Avengers"
-            src="https://m.media-amazon.com/images/M/MV5BNGE0YTVjNzUtNzJjOS00NGNlLTgxMzctZTY4YTE1Y2Y1ZTU4XkEyXkFqcGc@._V1_SX300.jpg"
-          />
-          <h3>The Avengers</h3>
-          <p>2012</p>
-          <a href="movie-detail.html" data-discover="true">
-            Details
-          </a>
-        </div>
-      </div>
+      {loading ? <p>Loading...</p> : <MovieList movies={movies} />}
     </div>
   );
 };
